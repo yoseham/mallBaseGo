@@ -2,7 +2,6 @@ package common
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"strconv"
 	"time"
@@ -13,9 +12,9 @@ func DataToStructByTagSql(data map[string]string, obj interface{}) {
 	objValue := reflect.ValueOf(obj).Elem()
 	for i := 0; i < objValue.NumField(); i++ {
 		//获取sql对应的值
-		fmt.Println(strconv.Itoa(i) + ":" + objValue.Type().Field(i).Tag.Get("sql"))
+		//fmt.Println(strconv.Itoa(i) + ":" + objValue.Type().Field(i).Tag.Get("sql"))
 		value := data[objValue.Type().Field(i).Tag.Get("sql")]
-		fmt.Println(value)
+		//fmt.Println(value)
 		//获取对应字段的名称
 		name := objValue.Type().Field(i).Name
 		//获取对应字段类型

@@ -1,6 +1,16 @@
 package common
 
-import "database/sql"
+import (
+	"database/sql"
+	// 引入数据库驱动注册及初始化
+	_ "github.com/go-sql-driver/mysql"
+)
+
+//创建mysql 连接
+func NewMysqlConn() (db *sql.DB, err error) {
+	db, err = sql.Open("mysql", "root:07597321@tcp(106.54.91.157:3306)/imooc?charset=utf8")
+	return
+}
 
 //获取返回值，获取一条
 func GetResultRow(rows *sql.Rows) map[string]string {

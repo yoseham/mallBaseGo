@@ -4,6 +4,7 @@ import (
 	"app/common"
 	"app/datamodels"
 	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
 	"strconv"
 )
 
@@ -31,7 +32,7 @@ func NewProductManager(table string, db *sql.DB) IProduct {
 //数据库连接
 func (p *ProductManager) Conn() (err error) {
 	if p.mysqlConn == nil {
-		mysql, err := sql.Open("mysql", "root:07597321@tcp(106.54.91.157:3306)/imooc?charset=utf8")
+		mysql, err := common.NewMysqlConn()
 		if err != nil {
 			return err
 		}
@@ -45,8 +46,11 @@ func (p *ProductManager) Conn() (err error) {
 
 //添加
 func (p *ProductManager) Insert(product *datamodels.Product) (id int64, err error) {
+	if err := p.Conn(); err != nil {
+		return 0, err
+	}
 	//准备sql
-	sql := "INSERT product SET productName=?, productNum=?, productImage=?, productUrl=?"
+	sql := "INSERT product SET ProductName=?, ProductNum=?, ProductImage=?, ProductUrl=?"
 	stmt, err := p.mysqlConn.Prepare(sql)
 	if err != nil {
 		return 0, err
@@ -61,6 +65,9 @@ func (p *ProductManager) Insert(product *datamodels.Product) (id int64, err erro
 
 //删除
 func (p *ProductManager) Delete(productID int64) (result bool, err error) {
+	if err := p.Conn(); err != nil {
+		return false, err
+	}
 	sql := "DELETE FROM product WHERE ID=?"
 	stmt, err := p.mysqlConn.Prepare(sql)
 	if err != nil {
@@ -75,12 +82,15 @@ func (p *ProductManager) Delete(productID int64) (result bool, err error) {
 
 //更新
 func (p *ProductManager) Update(product *datamodels.Product) (err error) {
-	sql := "UPDATE product set productName=? productNum=? productImage=? productUrl=? where ID=?" + strconv.FormatInt(product.ID, 10)
+	if err := p.Conn(); err != nil {
+		return err
+	}
+	sql := "UPDATE product set ProductName=?, ProductNum=?, ProductImage=?, ProductUrl=? where ID=" + strconv.FormatInt(product.ID, 10)
 	stmt, err := p.mysqlConn.Prepare(sql)
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(product.ProductName, product.ProductNum, product.ProductUrl, product.ProductImage)
+	_, err = stmt.Exec(product.ProductName, product.ProductNum, product.ProductImage, product.ProductUrl)
 	if err != nil {
 		return err
 	}
@@ -89,7 +99,10 @@ func (p *ProductManager) Update(product *datamodels.Product) (err error) {
 
 //根据商品ID查询商品
 func (p *ProductManager) SelectByKey(productID int64) (product *datamodels.Product, err error) {
-	sql := "SELECT * FROM product WHERE ID=" + strconv.FormatInt(product.ID, 10)
+	if err := p.Conn(); err != nil {
+		return nil, err
+	}
+	sql := "SELECT * FROM product WHERE ID=" + strconv.FormatInt(productID, 10)
 	row, errRow := p.mysqlConn.Query(sql)
 	defer row.Close()
 	if errRow != nil {
@@ -100,12 +113,16 @@ func (p *ProductManager) SelectByKey(productID int64) (product *datamodels.Produ
 	if len(result) == 0 {
 		return &datamodels.Product{}, nil
 	}
+	product = &datamodels.Product{}
 	common.DataToStructByTagSql(result, product)
 	return
 }
 
 //获取所有商品
 func (p *ProductManager) SelectAll() (products []*datamodels.Product, err error) {
+	if err := p.Conn(); err != nil {
+		return nil, err
+	}
 	sql := "SELECT * FROM product"
 	rows, errRow := p.mysqlConn.Query(sql)
 	defer rows.Close()

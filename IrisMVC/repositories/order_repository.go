@@ -35,7 +35,7 @@ func (o *OrderManagerRepository) Conn() (err error) {
 		}
 		o.mysqlConn = mysql
 		if o.table == "" {
-			o.table = "order"
+			o.table = "iorder"
 		}
 	}
 	return
@@ -46,7 +46,8 @@ func (o *OrderManagerRepository) Insert(order *datamodels.Order) (orderID int64,
 		return 0, err
 	}
 	//准备sql
-	sql := "INSERT " + o.table + " SET UserID=?, ProductID=?, OrderStatus"
+	sql := "INSERT " + o.table + " SET UserID=?, ProductID=?, OrderStatus=?"
+	fmt.Println(sql)
 	stmt, errStmt := o.mysqlConn.Prepare(sql)
 	if errStmt != nil {
 		return 0, err
@@ -64,6 +65,7 @@ func (o *OrderManagerRepository) Delete(orderID int64) (result bool, err error) 
 		return false, err
 	}
 	sql := "DELETE FROM " + o.table + " WHERE ID=?"
+	fmt.Println(sql)
 	stmt, err := o.mysqlConn.Prepare(sql)
 	if err != nil {
 		return false, err
@@ -79,7 +81,8 @@ func (o *OrderManagerRepository) Update(order *datamodels.Order) (err error) {
 	if err := o.Conn(); err != nil {
 		return err
 	}
-	sql := "UPDATE " + o.table + " SET UserID=?, ProductID=?, OrderStatus=? here ID=" + strconv.FormatInt(order.ID, 10)
+	sql := "UPDATE " + o.table + " SET UserID=?, ProductID=?, OrderStatus=? where ID=" + strconv.FormatInt(order.ID, 10)
+	fmt.Println(sql)
 	stmt, errStmt := o.mysqlConn.Prepare(sql)
 	if errStmt != nil {
 		return err
@@ -96,6 +99,7 @@ func (o *OrderManagerRepository) SelectByKey(orderID int64) (order *datamodels.O
 		return nil, err
 	}
 	sql := "SELECT * FROM " + o.table + " WHERE ID=" + strconv.FormatInt(orderID, 10)
+	fmt.Println(sql)
 	row, errRow := o.mysqlConn.Query(sql)
 	defer row.Close()
 	if errRow != nil {
@@ -116,6 +120,7 @@ func (o *OrderManagerRepository) SelectAll() (orders []*datamodels.Order, err er
 		return nil, err
 	}
 	sql := "SELECT * FROM " + o.table
+	fmt.Println(sql)
 	rows, errRow := o.mysqlConn.Query(sql)
 	defer rows.Close()
 	if errRow != nil {
@@ -138,7 +143,8 @@ func (o *OrderManagerRepository) SelectAllWithInfo() (orderMap map[int]map[strin
 	if err := o.Conn(); err != nil {
 		return nil, err
 	}
-	sql := "SELECT o.ID, p.ProductName, o.OrderStatus FROM imooc.order as o left join imooc.product as p on o.ProductID = p.ID"
+	sql := "SELECT o.ID, p.ProductName, o.OrderStatus FROM iorder as o left join product as p on o.ProductID = p.ID"
+	fmt.Println(sql)
 	rows, errRow := o.mysqlConn.Query(sql)
 	defer rows.Close()
 	if errRow != nil {

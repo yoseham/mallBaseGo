@@ -18,6 +18,7 @@
                                 <th style="width:17%;">用户名称</th>
                                 <th style="width:15%;">商品名称</th>
                                 <th style="width:10%;">发货状态</th>
+                                <th style="width:30%;">操作</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -28,6 +29,7 @@
                                 <td class="milestone"> {{$v.ProductName}}
                                 </td>
                                 <td class="cell-detail">{{ if eq $v.OrderStatus "1"}} 已发货 {{else}} 未发货 {{end}}</td>
+                                <td class="cell-detail"><a href="/order/manager?id={{$v.ID}}"><button class="btn btn-space btn-primary">修改</button></a> <a href="/order/delete?id={{$v.ID}}"><button class="btn btn-space btn-danger">删除</button></a>   </td>
                             </tr>
                             {{end}}
                             </tbody>
@@ -36,5 +38,6 @@
                 </div>
             </div>
         </div>
+        <div class="panel-heading">已发货{{$.sended}}, 未发货{{$.nosend}}</div>
     </div>
 </div>

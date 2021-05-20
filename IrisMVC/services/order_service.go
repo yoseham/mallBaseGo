@@ -12,6 +12,7 @@ type IOrderService interface {
 	InsertOrder(*datamodels.Order) (int64, error)
 	UpdateOrder(*datamodels.Order) error
 	GetAllOrderInfo() (map[int]map[string]string, error)
+	GetCount() (int64, int64)
 }
 type OrderService struct {
 	OrderRepository repositories.IOrderRepository
@@ -42,4 +43,15 @@ func (o *OrderService) UpdateOrder(order *datamodels.Order) error {
 }
 func (o *OrderService) GetAllOrderInfo() (map[int]map[string]string, error) {
 	return o.OrderRepository.SelectAllWithInfo()
+}
+func (o *OrderService) GetCount() (sended int64, nonsend int64) {
+	orders, _ := o.OrderRepository.SelectAll()
+	for _, orderptr := range orders {
+		if (*orderptr).OrderStatus == 1 {
+			sended += 1
+		} else {
+			nonsend += 1
+		}
+	}
+	return
 }
